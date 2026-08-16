@@ -54,3 +54,6 @@ public/workbox-*.js
 
 # Temporary files and test data
 tmp/
+
+# Agent API keys kept out of the repo (work order Phase 0)
+.env.local.notes
