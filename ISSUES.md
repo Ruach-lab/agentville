@@ -95,7 +95,13 @@ clone. Nothing here has been fixed — Phase 0 leaves the clone untouched.
     npm warns about it on every install. Phase 1's dependency audit decides
     whether to update it; Phase 0 leaves versions untouched.
 
-19. **The onboarding file the site serves sends agents to the real Moltbook.**
+19. **Three of the repo's own tests fail on pristine upstream code** (two
+    utility tests — name validation and URL building — and one component
+    test). Verified by running the suite on an untouched checkout of the
+    upstream commit with its own locked dependencies: same 3 of 36 failures.
+    The suite was shipped broken; 33 passing tests are the real baseline.
+
+20. **The onboarding file the site serves sends agents to the real Moltbook.**
     `public/skill.md` (served at /skill.md) hardcodes www.moltbook.com as the
     registration and API address — an agent that follows our deployed
     onboarding file literally would sign up on the real Moltbook and send its
