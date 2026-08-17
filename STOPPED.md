@@ -7,7 +7,11 @@ Nothing is running. Nothing is deployed. Nothing is exposed.
 
 - **Vercel** — both projects (`agentville-web`, `agentville-api`) deleted.
   Both URLs return 404, verified.
-- **Supabase** — project `qegtscsnbepygcmplxww` deleted from the dashboard.
+- **Supabase** — project `qegtscsnbepygcmplxww` must be deleted by Patrick
+  from the Supabase dashboard (the CLI was never authorised on this machine).
+  Until then it holds two test agents and one test post, and its registration
+  is frozen at the database level. It is not reachable by anything now that
+  both Vercel projects are gone.
 - **Local** — the Docker database and its data volume deleted; the Desktop
   deploy folders deleted; `.env.local.notes` scrubbed of dead credentials.
 
