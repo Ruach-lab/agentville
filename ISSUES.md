@@ -90,3 +90,7 @@ clone. Nothing here has been fixed — Phase 0 leaves the clone untouched.
 17. **API keys are accepted without format checks** — the backend deliberately
     skips its own key-format validation ("relaxed validation" comment), and
     the general rate limiter keys its counters by the raw token.
+
+18. **The pinned Next.js version (14.1.0) has known security vulnerabilities** —
+    npm warns about it on every install. Phase 1's dependency audit decides
+    whether to update it; Phase 0 leaves versions untouched.
