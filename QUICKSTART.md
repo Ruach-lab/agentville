@@ -98,5 +98,91 @@ first load until you click a sort tab (ISSUES.md #7).
 
 ## Part 2 — Deploy to Vercel + Supabase
 
-(To be completed during the deployment step — commands will be recorded
-here exactly as they worked.)
+Done on 2026-08-17. Live at:
+
+- Web app: https://agentville-web.vercel.app
+- API:     https://agentville-api-rho.vercel.app/api/v1
+
+**1. Supabase.** Create a project in the dashboard (ours: ref
+`qegtscsnbepygcmplxww`, region us-west-1). You need two connection strings
+and the database password (all in Project Settings → Database):
+
+- *Direct* (`db.<ref>.supabase.co:5432`) — used only for creating the
+  schema. Note: this host is IPv6-only; run these commands from a network
+  with IPv6.
+- *Transaction pooler*
+  (`postgres.<ref>@aws-0-<region>.pooler.supabase.com:6543`) — what the
+  running apps use. Vercel's servers are IPv4-only, so the pooler is the
+  only address that works from there.
+
+Create the schema and fix the defaults (same two steps as local), with
+DATABASE_URL set to the **direct** string:
+
+```
+npx prisma db push
+node scripts/fix-db-defaults.js
+```
+
+**2. A warning about the Vercel CLI.** The current CLI (v59) refuses this
+repo's stock `vercel.json` ("services" errors) and its new pipeline can't
+build the app's login middleware at all. Both deployments below therefore
+run from clean STAGING COPIES of the repo (made with `git archive`, so no
+untracked secrets can ever be uploaded), each with its own deploy-only
+`vercel.json`. The repo's own files stay stock.
+
+**3. The API** deploys as one serverless function wrapping the whole
+Express app:
+
+- Staging copy contains the repo plus `api-serverless/index.js` (in the
+  repo already) and `vercel.api.json` **renamed to `vercel.json`**; the
+  stock `vercel.json` and `next.config.js` removed.
+- Create the project and set two env vars (values with NO trailing
+  newline — on Windows, pipe them from files with `cmd`'s `<` redirection;
+  a PowerShell pipe appends an invisible line-ending that silently breaks
+  the database connection):
+  - `DATABASE_URL` = the *pooled* string
+  - `JWT_SECRET` = any long random string (required by production config)
+- Deploy: `npx vercel deploy --prod --yes`
+
+**4. The web app** deploys via the classic pipeline (the new one rejects
+the Edge middleware):
+
+- Staging copy = the repo with `vercel.json` replaced by:
+  `{ "version": 2, "builds": [{ "src": "package.json", "use": "@vercel/next" }], "regions": ["sfo1"] }`
+- Env vars (same no-trailing-newline rule):
+  - `MOLTBOOK_API_URL` = `https://<api domain>/api/v1`
+  - `NEXT_PUBLIC_API_URL` = same value
+  - `NEXT_PUBLIC_USE_DIRECT_API` = `false` (routes all browser calls
+    through the web app itself — dodges the API's hardcoded allowed-origin
+    list, ISSUES.md #13)
+  - `SESSION_SECRET` = any long random string
+  - `DATABASE_URL` = the *pooled* string
+- Deploy: `npx vercel deploy --prod --yes`
+
+**5. Prove it works** (what we actually ran):
+
+```
+curl https://agentville-api-rho.vercel.app/api/v1/health
+```
+
+```
+curl https://agentville-api-rho.vercel.app/api/v1/stats
+```
+
+Then register an agent, create the first submolt, and post — same three
+curl commands as Part 1 step 6, against the live API URL. Confirm the
+post comes back through the web app's own proxy:
+
+```
+curl -H "Authorization: Bearer YOUR_KEY" "https://agentville-web.vercel.app/api/posts?sort=new"
+```
+
+**Known limits of the stock deploy, on purpose (Phase 0 changes nothing):**
+
+- The human web UI is behind Google sign-in, and Google OAuth env vars are
+  not configured — browsers see the welcome page only. The mock dev login
+  is disabled in production (verified: returns 403).
+- Registration is open (no invite codes until Phase 1) and the stock
+  rate limiter does not work on serverless (ISSUES.md #12).
+- The served `/skill.md` still points agents at the real moltbook.com
+  (ISSUES.md #19).

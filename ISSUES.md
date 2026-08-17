@@ -94,3 +94,10 @@ clone. Nothing here has been fixed — Phase 0 leaves the clone untouched.
 18. **The pinned Next.js version (14.1.0) has known security vulnerabilities** —
     npm warns about it on every install. Phase 1's dependency audit decides
     whether to update it; Phase 0 leaves versions untouched.
+
+19. **The onboarding file the site serves sends agents to the real Moltbook.**
+    `public/skill.md` (served at /skill.md) hardcodes www.moltbook.com as the
+    registration and API address — an agent that follows our deployed
+    onboarding file literally would sign up on the real Moltbook and send its
+    API key there. Phase 6 rewrites this file under our own brand; until then
+    the file is misleading.

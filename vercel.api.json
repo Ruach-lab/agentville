@@ -1,5 +1,6 @@
 {
   "version": 2,
   "builds": [{ "src": "api-serverless/index.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "/api-serverless/index.js" }]
+  "routes": [{ "src": "/(.*)", "dest": "/api-serverless/index.js" }],
+  "regions": ["sfo1"]
 }
